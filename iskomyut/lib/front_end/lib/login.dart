@@ -48,16 +48,9 @@ class _LoginState extends State<Login> {
                 Row(
                   children: [
                     Expanded(
-                      flex: 4,
-                      child: FormInput(contextTextTheme: contextTextTheme, labelText: "First Name", icon: Icons.person),
-                    ),
-            
-                    Spacer(),
-            
-                    Expanded(
-                      flex: 4,
-                      child: FormInput(contextTextTheme: contextTextTheme, labelText: "Last Name", icon: Icons.person),
-                    )
+                          flex: 4,
+                          child: FormInput(contextTextTheme: contextTextTheme, labelText: "Mobile Number", icon: Icons.phone_iphone),
+                        ),
                   ],
                 ),
                 SizedBox(height: 20),
@@ -66,24 +59,6 @@ class _LoginState extends State<Login> {
                     Expanded(
                           flex: 4,
                           child: FormInput(contextTextTheme: contextTextTheme, labelText: "Password", icon: Icons.lock, password: true,),
-                        ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                          flex: 4,
-                          child: FormInput(contextTextTheme: contextTextTheme, labelText: "Confirm Password", icon: Icons.lock, password: true,),
-                        ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                          flex: 4,
-                          child: FormInput(contextTextTheme: contextTextTheme, labelText: "Mobile Number", icon: Icons.phone_iphone),
                         ),
                   ],
                 ),
