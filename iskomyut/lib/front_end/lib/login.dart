@@ -21,8 +21,16 @@ class _LoginState extends State<Login> {
       display automatically scrolls up when opening the keyboard, preventing input fields from being blocked by the keyboard.
     */
 
-    double screenWidth = MediaQuery.of(context).size.width; //Get the width of the screen for responsiveness
+    double _screenWidth = MediaQuery.of(context).size.width; //Get the width of the screen for responsiveness
     final contextTextTheme = Theme.of(context).textTheme;
+    final fieldValueController = TextEditingController(); //controller to retrieve value of the TextField inputs
+    
+    @override
+    void dispose() {
+      // Clean up the controller when the widget is disposed.
+      fieldValueController.dispose();
+      super.dispose();  
+    }
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -33,7 +41,7 @@ class _LoginState extends State<Login> {
             maxWidth: MediaQuery.of(context).size.width,
           ),
           child: Padding(
-            padding: EdgeInsets.all(screenWidth*.10),
+            padding: EdgeInsets.all(_screenWidth*.10),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -127,11 +135,11 @@ class SubmitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width; //Get the width of the screen for responsiveness
+    double _screenWidth = MediaQuery.of(context).size.width; //Get the width of the screen for responsiveness
 
     return Center(
       child: Container(
-        width: (screenWidth * .75),
+        width: (_screenWidth * .75),
         child: ElevatedButton(
           child: Text(
             "Submit",
