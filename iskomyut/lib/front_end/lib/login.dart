@@ -15,12 +15,6 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     /*
-      Login screen still incomplete. User input forms have been wrapped into their own widget (FormInput) for reusability of code
-      as they share the same styles. Sizing is based on the width of the screen for responsive design, but has not been
-      implemented yet. Perhaps one way to do is to adjust the size of the padding in the body portion of the Scaffold. 
-    */
-
-    /*
       Workaround for issue: keyboard blocking input lines
       Workaround link: https://stackoverflow.com/questions/67571423/bottom-overflowed-by-x-pixels-when-showing-keyboard
       Made the column have the same height as the screen size and wrapped it with a SingleChildScrollView so that the
