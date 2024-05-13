@@ -120,7 +120,7 @@ class FormInput extends StatelessWidget {
       shadowColor: Color(0x46000000),
       borderRadius: BorderRadius.circular(10.0),
       color: Colors.transparent,
-      child: TextField(
+      child: TextFormField(
         maxLength: 20,
         obscureText: password,
         decoration: InputDecoration(
