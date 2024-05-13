@@ -1,6 +1,5 @@
 library front_end;
 
-
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -11,6 +10,22 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+
+  /*
+    Create a list of TextEditingControllers to take the inputs of the TextFields
+    Applying the DRY principle
+  */
+  final List<TextEditingController> _fieldValueControllers = List.generate(2, (i) => TextEditingController());
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    for(TextEditingController controller in _fieldValueControllers){
+      print("disposed!");
+      controller.dispose();
+    }
+    super.dispose();  
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +38,6 @@ class _LoginState extends State<Login> {
 
     double _screenWidth = MediaQuery.of(context).size.width; //Get the width of the screen for responsiveness
     final contextTextTheme = Theme.of(context).textTheme;
-    final fieldValueController = TextEditingController(); //controller to retrieve value of the TextField inputs
-    
-    @override
-    void dispose() {
-      // Clean up the controller when the widget is disposed.
-      fieldValueController.dispose();
-      super.dispose();  
-    }
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -57,7 +64,11 @@ class _LoginState extends State<Login> {
                   children: [
                     Expanded(
                           flex: 4,
-                          child: FormInput(contextTextTheme: contextTextTheme, labelText: "Mobile Number", icon: Icons.phone_iphone),
+                          child: FormInput(
+                            contextTextTheme: contextTextTheme, 
+                            labelText: "Mobile Number", 
+                            icon: Icons.phone_iphone,
+                            inputController: _fieldValueControllers[0],),
                         ),
                   ],
                 ),
@@ -66,12 +77,17 @@ class _LoginState extends State<Login> {
                   children: [
                     Expanded(
                           flex: 4,
-                          child: FormInput(contextTextTheme: contextTextTheme, labelText: "Password", icon: Icons.lock, password: true,),
+                          child: FormInput(
+                            contextTextTheme: contextTextTheme, 
+                            labelText: "Password", 
+                            icon: Icons.lock, 
+                            password: true,
+                            inputController: _fieldValueControllers[1],),
                         ),
                   ],
                 ),
                 SizedBox(height: 20),
-                SubmitButton(),
+                SubmitButton(controllers: _fieldValueControllers,),
               ],
             ),
           ),
@@ -81,12 +97,13 @@ class _LoginState extends State<Login> {
   }
 }
 
-class FormInput extends StatelessWidget {
+class FormInput extends StatefulWidget {
   const FormInput({
     super.key,
     required this.contextTextTheme,
     required this.labelText,
     required this.icon,
+    required this.inputController,
     this.password = false,
   });
 
@@ -94,7 +111,13 @@ class FormInput extends StatelessWidget {
   final String labelText;
   final IconData icon;
   final bool password;
+  final TextEditingController inputController;
 
+  @override
+  State<FormInput> createState() => _FormInputState();
+}
+
+class _FormInputState extends State<FormInput> {
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -102,20 +125,21 @@ class FormInput extends StatelessWidget {
       shadowColor: Color(0x46000000),
       borderRadius: BorderRadius.circular(10.0),
       color: Colors.transparent,
-      child: TextField(
+      child: TextFormField(
+        controller: widget.inputController,
         maxLength: 20,
-        obscureText: password,
+        obscureText: widget.password,
         decoration: InputDecoration(
           isDense: true,
           prefixIcon: Icon(
-            icon,
+            widget.icon,
             color: Colors.black,
             size: 18,
             ),
           fillColor: Color(0xFFF4F4F4),
           filled: true,
-          hintText: labelText,
-          hintStyle: contextTextTheme.labelLarge,
+          hintText: widget.labelText,
+          hintStyle: widget.contextTextTheme.labelLarge,
           counterText: "",
           contentPadding: const EdgeInsets.all(4.0),
           border: OutlineInputBorder(
@@ -131,7 +155,10 @@ class FormInput extends StatelessWidget {
 class SubmitButton extends StatelessWidget {
   const SubmitButton({
     super.key,
+    required this.controllers,
   });
+
+  final List<TextEditingController> controllers;
 
   @override
   Widget build(BuildContext context) {
@@ -141,12 +168,6 @@ class SubmitButton extends StatelessWidget {
       child: Container(
         width: (_screenWidth * .75),
         child: ElevatedButton(
-          child: Text(
-            "Submit",
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.white,
-            ),
-          ),
           style: ButtonStyle(
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
@@ -155,8 +176,14 @@ class SubmitButton extends StatelessWidget {
             ),
           ),
           onPressed: () {
-            Navigator.pushNamed(context, '/dash');
+            print(controllers[0].text); //TODO Test only
           },
+          child: Text(
+            "Submit",
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
     );
