@@ -1,9 +1,9 @@
+import 'package:front_end/signup.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:Iskomyut/front_end/lib/userdash.dart';
-import 'package:Iskomyut/front_end/lib/login.dart';
-import 'package:Iskomyut/front_end/lib/loading.dart';
+import 'package:front_end/userdash.dart';
+import 'package:front_end/login.dart';
+import 'package:front_end/loading.dart';
 
 void main() {
   runApp(MyApp());
@@ -42,6 +42,7 @@ class MyApp extends StatelessWidget {
           '/': (context) => Loading(),
           '/dash': (context) => UserDashboard(),
           '/login': (context) => Login(),
+          '/signup': (context) => Signup(),
         }
       );
   }
