@@ -60,16 +60,15 @@ class DBManager{
     return (result.length == 1);
   }
 
-  Future<void> insert(String table, {List<String>? columns, String? where, required List<dynamic> values}) async {
+  Future<bool> insert(String table, {List<String>? columns, String? where, required List<dynamic> values}) async {
     var conn = await connect();
     
     try{
       //Using string interpolation to insert function parameters
-      var result = await conn.query(
-        'INSERT INTO $table (${columns != null ? columns.join(', ') : ''}) values $values ${where != null ? 'WHERE $where' : ''}'
-        );
-
+      String query = 'INSERT INTO $table(${columns != null ? columns.join(', ') : ''}) VALUES (${values.join(', ')}) ${where != null ? 'WHERE $where' : ''}';
+      await conn.query(query);
       await conn.close();
+      return true;
     }
     catch (e){
       await conn.close();

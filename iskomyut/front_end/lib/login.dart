@@ -1,8 +1,13 @@
 library front_end;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:db_integration/db_integration.dart';
 import 'package:flutter/widgets.dart';
+import 'package:crypto/crypto.dart';
+
+final _formKey = GlobalKey<FormState>();
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -28,6 +33,16 @@ class _LoginState extends State<Login> {
       controller.dispose();
     }
     super.dispose();  
+  }
+
+  String? validatePhone(String? phone){
+    RegExp phoneNo = RegExp(r'\d{11}');
+    final isPhoneValid = phoneNo.hasMatch(phone ?? '');
+
+    if(!isPhoneValid){
+      return 'Please enter a valid phone number.';
+    }
+    return null;
   }
 
   void _showInvalidLogin(){
@@ -59,68 +74,74 @@ class _LoginState extends State<Login> {
           ),
           child: Padding(
             padding: EdgeInsets.all(_screenWidth*.10),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  children: [
-                    Text("Log in", style: contextTextTheme.headlineLarge),
-                  ],
-                ),
-                SizedBox(height:30,),
-                Row(
-                  children: [
-                    Expanded(
-                          flex: 4,
-                          child: FormInput(
-                            contextTextTheme: contextTextTheme, 
-                            labelText: "Mobile Number", 
-                            icon: Icons.phone_iphone,
-                            inputController: _fieldValueControllers[0],),
-                        ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                          flex: 4,
-                          child: FormInput(
-                            contextTextTheme: contextTextTheme, 
-                            labelText: "Password", 
-                            icon: Icons.lock, 
-                            password: true,
-                            inputController: _fieldValueControllers[1],),
-                        ),
-                  ],
-                ),
-                if(_invalidCredentials == true) ...[
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Text("Log in", style: contextTextTheme.headlineLarge),
+                    ],
+                  ),
                   SizedBox(height:30,),
                   Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                            color: Color(0x32F48B29),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Incorrect Credentials", 
-                              style: contextTextTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)
-                            ),
-                          ),
-                        ),
+                            flex: 4,
+                            child: FormInput(
+                              contextTextTheme: contextTextTheme, 
+                              labelText: "Mobile Number", 
+                              icon: Icons.phone_iphone,
+                              inputController: _fieldValueControllers[0],
+                              validator: validatePhone,
+                          )
                       ),
                     ],
                   ),
+                  SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                            flex: 4,
+                            child: FormInput(
+                              contextTextTheme: contextTextTheme, 
+                              labelText: "Password", 
+                              icon: Icons.lock, 
+                              password: true,
+                              inputController: _fieldValueControllers[1],
+                              validator: (value) => value=="" ? 'Please fill out this field.' : null),
+                          ),
+                    ],
+                  ),
+                  if(_invalidCredentials == true) ...[
+                    SizedBox(height:30,),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                              color: Color(0x32F48B29),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "Incorrect Credentials", 
+                                style: contextTextTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  SizedBox(height: 20),
+                  SubmitButton(controllers: _fieldValueControllers, showInvalidLogin: _showInvalidLogin),
                 ],
-                SizedBox(height: 20),
-                SubmitButton(controllers: _fieldValueControllers, showInvalidLogin: _showInvalidLogin),
-              ],
+              ),
             ),
           ),
         ),
@@ -129,13 +150,14 @@ class _LoginState extends State<Login> {
   }
 }
 
-class FormInput extends StatefulWidget {
+class FormInput extends StatelessWidget {
   const FormInput({
     super.key,
     required this.contextTextTheme,
     required this.labelText,
     required this.icon,
     required this.inputController,
+    required this.validator,
     this.password = false,
   });
 
@@ -144,12 +166,8 @@ class FormInput extends StatefulWidget {
   final IconData icon;
   final bool password;
   final TextEditingController inputController;
+  final String? Function(String?)? validator;
 
-  @override
-  State<FormInput> createState() => _FormInputState();
-}
-
-class _FormInputState extends State<FormInput> {
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -158,20 +176,21 @@ class _FormInputState extends State<FormInput> {
       borderRadius: BorderRadius.circular(10.0),
       color: Colors.transparent,
       child: TextFormField(
-        controller: widget.inputController,
+        controller: inputController,
         maxLength: 20,
-        obscureText: widget.password,
+        obscureText: password,
+        validator: validator,
         decoration: InputDecoration(
           isDense: true,
           prefixIcon: Icon(
-            widget.icon,
+            icon,
             color: Colors.black,
             size: 18,
             ),
           fillColor: Color(0xFFF4F4F4),
           filled: true,
-          hintText: widget.labelText,
-          hintStyle: widget.contextTextTheme.labelLarge,
+          hintText: labelText,
+          hintStyle: contextTextTheme.labelLarge,
           counterText: "",
           contentPadding: const EdgeInsets.all(4.0),
           border: OutlineInputBorder(
@@ -210,16 +229,20 @@ class SubmitButton extends StatelessWidget {
             ),
           ),
           onPressed: () async {
-            String username = controllers[0].text;
-            String password = controllers[1].text;
-            var db = DBManager();
-            var inputIsCorrect = await db.isPresent('service_providers', where: 'username = "$username" AND password = "$password"');
-            if (inputIsCorrect == true && context.mounted){
-              Navigator.pushNamed(context, '/dash');
+            if(_formKey.currentState!.validate()){
+              String phoneNo = controllers[0].text;
+              String password = md5.convert(utf8.encode(controllers[1].text)).toString();
+              
+              var db = DBManager();
+              var inputIsCorrect = await db.isPresent('passengers', where: 'phone = "$phoneNo" AND password = "$password"');
+              if (inputIsCorrect == true && context.mounted){
+                Navigator.pushNamed(context, '/dash');
+              }
+              else{
+                showInvalidLogin();
+              }
             }
-            else{
-              showInvalidLogin();
-            }
+            
           },
           child: Text(
             "Submit",
