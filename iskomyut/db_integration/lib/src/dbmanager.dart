@@ -5,14 +5,7 @@ import 'env.dart';
 class DBManager{
   Future<MySqlConnection> connect() async{
     var settings = ConnectionSettings(
-      /*
-      host: env['host']!,
-      port: int.parse(env['port']!),
-      user: env['user'],
-      password: env['password'],
-      db: env['db'],
-      */
-      
+
       host: Env.host,
       port: Env.port,
       user: Env.user,
