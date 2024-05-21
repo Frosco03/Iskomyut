@@ -60,20 +60,20 @@ class _LoginState extends State<Login> {
       display automatically scrolls up when opening the keyboard, preventing input fields from being blocked by the keyboard.
     */
 
-    double _screenWidth = MediaQuery.of(context).size.width; //Get the width of the screen for responsiveness
+    double screenWidth = MediaQuery.of(context).size.width; //Get the width of the screen for responsiveness
     final contextTextTheme = Theme.of(context).textTheme;
 
 
     return Scaffold(
       body: SingleChildScrollView(
-        physics: RangeMaintainingScrollPhysics(),
+        physics: const RangeMaintainingScrollPhysics(),
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height,
             maxWidth: MediaQuery.of(context).size.width,
           ),
           child: Padding(
-            padding: EdgeInsets.all(_screenWidth*.10),
+            padding: EdgeInsets.all(screenWidth*.10),
             child: Form(
               key: _formKey,
               child: Column(
