@@ -1,3 +1,4 @@
+import 'package:front_end/manage_vehicles.dart';
 import 'package:front_end/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,6 +26,9 @@ class MyApp extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
             headlineSmall: GoogleFonts.workSans(),
+            titleLarge: GoogleFonts.workSans().copyWith(
+              fontWeight: FontWeight.bold,
+            ),
             titleMedium: GoogleFonts.workSans(),
             labelLarge: GoogleFonts.workSans(),
           ).apply(
@@ -37,12 +41,13 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        initialRoute: '/login',
+        initialRoute: '/manage_vehicles',
         routes:{
           '/': (context) => Loading(),
           '/dash': (context) => UserDashboard(),
           '/login': (context) => Login(),
           '/signup': (context) => Signup(),
+          '/manage_vehicles': (context) => ManageVehicles(),
         }
       );
   }
