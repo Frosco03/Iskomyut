@@ -16,6 +16,7 @@ class VehicleForm extends StatefulWidget {
 class _VehicleFormState extends State<VehicleForm> {
 
   final List<TextEditingController> _fieldValueControllers = List.generate(3, (i) => TextEditingController());
+  bool isUpdate = false; //boolean to check if user is adding new vehicle or updating existing data
 
   @override
   Widget build(BuildContext context) {
@@ -34,55 +35,61 @@ class _VehicleFormState extends State<VehicleForm> {
           child: Padding(
             padding: EdgeInsets.all(MediaQuery.of(context).size.width*.15),
             child: Form(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
+              child: Center(
+                child: SingleChildScrollView(
+                  physics: const RangeMaintainingScrollPhysics(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
-                        flex: 4,
-                        child: FormInput(
-                          contextTextTheme: contextTextTheme, 
-                          labelText: "Model", 
-                          icon: Icons.airport_shuttle,
-                          inputController: _fieldValueControllers[0],
-                          validator: (value) => null, //TODO
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 4,
+                            child: FormInput(
+                              contextTextTheme: contextTextTheme, 
+                              labelText: "Model", 
+                              icon: Icons.airport_shuttle,
+                              inputController: _fieldValueControllers[0],
+                              validator: (value) => null, //TODO
+                            ),
+                          ),
+                        ],
                       ),
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 4,
+                            child: FormInput(
+                              contextTextTheme: contextTextTheme, 
+                              labelText: "Plate No", 
+                              icon: Icons.pin,
+                              inputController: _fieldValueControllers[1],
+                              validator: (value) => null, //TODO
+                            ),
+                          ),
+                          SizedBox(width: 20),
+                          Expanded(
+                            flex: 3,
+                            child: FormInput(
+                              contextTextTheme: contextTextTheme, 
+                              labelText: "Capacity", 
+                              icon: Icons.groups,
+                              inputController: _fieldValueControllers[2],
+                              validator: (value) => null, //TODO
+                              keyType: TextInputType.number,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 30),
+                      DeleteButton(),
+                      SubmitButton(controllers: _fieldValueControllers),
                     ],
                   ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: FormInput(
-                          contextTextTheme: contextTextTheme, 
-                          labelText: "Plate No", 
-                          icon: Icons.pin,
-                          inputController: _fieldValueControllers[1],
-                          validator: (value) => null, //TODO
-                        ),
-                      ),
-                      SizedBox(width: 20),
-                      Expanded(
-                        flex: 3,
-                        child: FormInput(
-                          contextTextTheme: contextTextTheme, 
-                          labelText: "Capacity", 
-                          icon: Icons.groups,
-                          inputController: _fieldValueControllers[2],
-                          validator: (value) => null, //TODO
-                          keyType: TextInputType.number,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 30),
-                  SubmitButton(controllers: _fieldValueControllers),
-                ],
+                ),
               ),
             ),
           )
@@ -173,6 +180,39 @@ class SubmitButton extends StatelessWidget {
           onPressed: () {},
           child: Text(
             "Submit",
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DeleteButton extends StatelessWidget {
+  const DeleteButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double _screenWidth = MediaQuery.of(context).size.width; //Get the width of the screen for responsiveness
+
+    return Center(
+      child: Container(
+        width: (_screenWidth * .75),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                ),
+            ),
+          ),
+          onPressed: () {},
+          child: Text(
+            "Delete",
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Colors.white,
             ),
