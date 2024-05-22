@@ -268,7 +268,7 @@ class SubmitButton extends StatelessWidget {
 
               //If successfully inserted data, move to dashboard
               if(insertData && context.mounted){
-                Navigator.pushNamed(context, '/dash');
+                Navigator.pushReplacementNamed(context, '/dash');
               }
             }
           },
