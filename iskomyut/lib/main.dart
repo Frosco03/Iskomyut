@@ -1,6 +1,7 @@
 import 'package:front_end/manage_vehicles.dart';
 import 'package:front_end/signup.dart';
 import 'package:flutter/material.dart';
+import 'package:front_end/vehicle_form.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:front_end/userdash.dart';
 import 'package:front_end/login.dart';
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
           '/login': (context) => Login(),
           '/signup': (context) => Signup(),
           '/manage_vehicles': (context) => ManageVehicles(),
+          '/vehicle_form': (context) => VehicleForm(),
         }
       );
   }

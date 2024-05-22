@@ -81,7 +81,8 @@ class VehicleCard extends StatelessWidget {
         color: const Color(0xFFF4F4F4),
         child: InkWell(
           onTap: () {
-            //TODO go to the edit form
+            //Moves to the edit form
+            Navigator.pushNamed(context, '/vehicle_form');
           },
           child: Row(
             mainAxisSize: MainAxisSize.max,
