@@ -24,6 +24,10 @@ class _ManageVehiclesState extends State<ManageVehicles> {
     });
   }
 
+  /*
+    Taken from https://www.flutterclutter.dev/flutter/basics/reload-a-widget-after-navigator-pop/2021/35427/
+    method to refresh page every time we do Navigator.pop()
+  */
   void _refreshPage(){
     isReady = false;
     setState(() {
