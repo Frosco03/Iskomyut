@@ -236,7 +236,7 @@ class SubmitButton extends StatelessWidget {
               var db = DBManager();
               var inputIsCorrect = await db.isPresent('passengers', where: 'phone = "$phoneNo" AND password = "$password"');
               if (inputIsCorrect == true && context.mounted){
-                Navigator.pushReplacementNamed(context, '/dash');
+                Navigator.pushNamed(context, '/dash');
               }
               else{
                 showInvalidLogin();
