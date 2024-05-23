@@ -22,7 +22,7 @@ class DBManager{
     }
   }
 
-  Future<Results> select(String table, {List<String>? columns, String? where, String? join, String? joinCondition}) async {
+  Future<Results> select(String table, {List<String>? columns, String? where, List<String>? joins, String? joinCondition}) async {
     /*
       Fix on issue that returns no value. 
       Fix based on: https://stackoverflow.com/questions/76017696/why-wont-my-mysql1-queries-in-dart-return-any-results
@@ -34,7 +34,7 @@ class DBManager{
     await Future.delayed(Duration(seconds: 2)); 
     try{
       //Using string interpolation to insert function parameters
-      var query = 'SELECT ${columns != null ? columns.join(', ') : '*'} FROM $table ${join != null ? 'INNER JOIN $join ON $joinCondition' : ''} ${where != null ? 'WHERE $where' : ''}';
+      var query = 'SELECT ${columns != null ? columns.join(', ') : '*'} FROM $table ${joins != null ? joins.join(' ') : ''} ${where != null ? 'WHERE $where' : ''}';
       var result = await conn.query(query);
 
       await conn.close();
@@ -47,9 +47,9 @@ class DBManager{
     }   
   }
 
-  Future<List> getValues(String table, {List<String>? columns, String? where, String? join, String? joinCondition}) async{
+  Future<List> getValues(String table, {List<String>? columns, String? where, List<String>? joins}) async{
     //Gets the values from a select call and returns it as a list of rows
-    var result = await select(table, columns: columns, where: where, join: join, joinCondition: joinCondition);
+    var result = await select(table, columns: columns, where: where, joins: joins);
     var valueList = [];
     var it = result.iterator;
 
