@@ -16,7 +16,7 @@ class _ManageVehiclesState extends State<ManageVehicles> {
   bool isReady = false;
 
   void getVehicles() async{
-    vehicles = await db.getValues('vehicles', where: 'companyId = 1', join: 'vehicle_models', joinCondition: 'vehicles.model = vehicle_models.id'); //TODO make sure that the companyID is set to a variable    
+    vehicles = await db.getValues('vehicles', where: 'companyId = 1', joins: ['INNER JOIN vehicle_models ON vehicles.model = vehicle_models.id'],); //TODO make sure that the companyID is set to a variable    
     setState((){
       isReady = true;
     });
