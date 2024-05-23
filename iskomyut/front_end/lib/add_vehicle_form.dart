@@ -5,18 +5,16 @@ import 'package:flutter/material.dart';
 
 final _formKey = GlobalKey<FormState>();
 
-class VehicleUpdateForm extends StatefulWidget {
-  const VehicleUpdateForm({super.key});
+class AddVehicleForm extends StatefulWidget {
+  const AddVehicleForm({super.key});
 
   @override
-  State<VehicleUpdateForm> createState() => _VehicleFormState();
+  State<AddVehicleForm> createState() => _AddVehicleFormState();
 }
 
-class _VehicleFormState extends State<VehicleUpdateForm> {
+class _AddVehicleFormState extends State<AddVehicleForm> {
 
-  final List<TextEditingController> _fieldValueControllers = List.generate(3, (i) => TextEditingController());
-  Map data = {};
-  bool firstInit = true; //boolean to check if form was initialized first time, removed after building text value of controllers
+  final List<TextEditingController> _fieldValueControllers = List.generate(2, (i) => TextEditingController());
   List<DropdownMenuItem<String>> dropdownItems = [];
   var db = DBManager();
   late List models;
@@ -62,23 +60,10 @@ class _VehicleFormState extends State<VehicleUpdateForm> {
   @override
   Widget build(BuildContext context) {
     final contextTextTheme = Theme.of(context).textTheme;
-    data = ModalRoute.of(context)!.settings.arguments as Map;
-    int i = 0;
 
     if(!isReady){
       return Container(decoration: const BoxDecoration(color: Colors.white),);
     }
-
-    //Only set the value of the forms when the page is initialized for the first time
-    if(firstInit){
-      for(var v in data.values){
-        _fieldValueControllers[i].text = v.toString();
-        i++;
-      }
-      selectedModel = _fieldValueControllers[0].text;
-      listIndex = models.indexWhere((map) => map['modelName'] == selectedModel);
-    }
-    firstInit = false;
 
     return Scaffold(
       appBar: AppBar(
@@ -111,10 +96,9 @@ class _VehicleFormState extends State<VehicleUpdateForm> {
                               labelText: "Model", 
                               items: dropdownItems,
                               icon: Icons.airport_shuttle,
-                              validator: (value) => value=="" ? 'Please fill out this field.' : null, 
-                              selectedValue: selectedModel,
+                              validator: (value) => value==null ? 'Please select a model.' : null, 
                               modelsList: models,
-                              inputController: _fieldValueControllers[2],
+                              inputController: _fieldValueControllers[1],
                               changeSelection: changeSelection, //pass the input controller of capacity field 
                             ),
                           ),
@@ -129,7 +113,7 @@ class _VehicleFormState extends State<VehicleUpdateForm> {
                               contextTextTheme: contextTextTheme, 
                               labelText: "Plate No", 
                               icon: Icons.pin,
-                              inputController: _fieldValueControllers[1],
+                              inputController: _fieldValueControllers[0],
                               validator: (value) => value=="" ? 'Please fill out this field.' : null,
                             ),
                           ),
@@ -140,7 +124,7 @@ class _VehicleFormState extends State<VehicleUpdateForm> {
                               contextTextTheme: contextTextTheme, 
                               labelText: "Capacity", 
                               icon: Icons.groups,
-                              inputController: _fieldValueControllers[2],
+                              inputController: _fieldValueControllers[1],
                               validator: (value) => value=="" ? 'Please fill out this field.' : null,
                               keyType: TextInputType.number,
                               enabled: false,
@@ -149,7 +133,6 @@ class _VehicleFormState extends State<VehicleUpdateForm> {
                         ],
                       ),
                       const SizedBox(height: 30),
-                      DeleteButton(controllers: _fieldValueControllers),
                       SubmitButton(controllers: _fieldValueControllers, selectedModelID: models[listIndex]['id']),
                     ],
                   ),
@@ -233,7 +216,6 @@ class DropdownFormInput extends StatelessWidget {
     required this.icon,
     required this.validator,
     required this.items,
-    required this.selectedValue,
     required this.modelsList,
     required this.inputController,
     required this.changeSelection,
@@ -244,7 +226,6 @@ class DropdownFormInput extends StatelessWidget {
   final IconData icon;
   final List<DropdownMenuItem<String>> items;
   final String? Function(String?)? validator;
-  final String selectedValue;
   final List modelsList;
   final TextEditingController inputController;
   final Function(String, int) changeSelection;
@@ -277,7 +258,7 @@ class DropdownFormInput extends StatelessWidget {
           ),
         ), 
         items: items, 
-        value: selectedValue,
+        validator: validator,
         onChanged: (value) { 
           //Change the state of the 'capacity' field by changing the text in the controller assigned to the field
           int index = modelsList.indexWhere((map) => map['modelName'] == value);
@@ -316,63 +297,18 @@ class SubmitButton extends StatelessWidget {
           ),
           onPressed: () async{
             if(_formKey.currentState!.validate() && context.mounted){
-              Map data = ModalRoute.of(context)!.settings.arguments as Map; //get the original passed data
-              print(selectedModelID);
 
               var db = DBManager();
-              var updateData = await db.update('vehicles', colVal: ['model = $selectedModelID', 'plate = "${controllers[1].text}"'], where: 'plate = "${data['plateNo']}"');
+              //TODO change so that the companyID is set to the company that is logged in
+              var insertData = await db.insert('vehicles', columns: ['companyId', 'model', 'plate'], values: [1, selectedModelID, '"${controllers[0].text}"']);
 
-              if(updateData && context.mounted){
+              if(insertData && context.mounted){
                 Navigator.pop(context);
               }
             }
           },
           child: Text(
-            "Update Vehicle Information",
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class DeleteButton extends StatelessWidget {
-  const DeleteButton({
-    super.key,
-    required this.controllers,
-  });
-  final List<TextEditingController> controllers;
-
-  @override
-  Widget build(BuildContext context) {
-    double _screenWidth = MediaQuery.of(context).size.width; //Get the width of the screen for responsiveness
-
-    return Center(
-      child: Container(
-        width: (_screenWidth * .75),
-        child: ElevatedButton(
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Colors.red),
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                ),
-            ),
-          ),
-          onPressed: () async {
-            String plateNo = controllers[1].text;
-
-            var db = DBManager();
-            var deleteVehicle = await db.delete('vehicles', where: 'plate = "$plateNo"', );
-            if(deleteVehicle && context.mounted){
-              Navigator.pop(context);
-            }
-          },
-          child: Text(
-            "Delete Vehicle",
+            "Add New Vehicle",
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Colors.white,
             ),

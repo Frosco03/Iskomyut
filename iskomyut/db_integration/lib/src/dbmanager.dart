@@ -22,7 +22,7 @@ class DBManager{
     }
   }
 
-  Future<Results> select(String table, {List<String>? columns, String? where}) async {
+  Future<Results> select(String table, {List<String>? columns, String? where, String? join, String? joinCondition}) async {
     /*
       Fix on issue that returns no value. 
       Fix based on: https://stackoverflow.com/questions/76017696/why-wont-my-mysql1-queries-in-dart-return-any-results
@@ -34,9 +34,8 @@ class DBManager{
     await Future.delayed(Duration(seconds: 2)); 
     try{
       //Using string interpolation to insert function parameters
-      var result = await conn.query(
-        'SELECT ${columns != null ? columns.join(', ') : '*'} FROM $table ${where != null ? 'WHERE $where' : ''}'
-        );
+      var query = 'SELECT ${columns != null ? columns.join(', ') : '*'} FROM $table ${join != null ? 'INNER JOIN $join ON $joinCondition' : ''} ${where != null ? 'WHERE $where' : ''}';
+      var result = await conn.query(query);
 
       await conn.close();
       return result;
@@ -46,6 +45,19 @@ class DBManager{
       print(e);
       throw DatabaseOperationException('Failed to execute SELECT query');
     }   
+  }
+
+  Future<List> getValues(String table, {List<String>? columns, String? where, String? join, String? joinCondition}) async{
+    //Gets the values from a select call and returns it as a list of rows
+    var result = await select(table, columns: columns, where: where, join: join, joinCondition: joinCondition);
+    var valueList = [];
+    var it = result.iterator;
+
+    while (it.moveNext()) {
+      valueList.add(it.current);
+    }
+
+    return valueList;
   }
 
   Future<bool> isPresent(String table, {List<String>? columns, String? where}) async {
@@ -65,7 +77,39 @@ class DBManager{
     }
     catch (e){
       await conn.close();
-      throw DatabaseOperationException('Failed to execute SELECT query');
+      throw DatabaseOperationException('Failed to execute INSERT query');
     }  
+  }
+
+  Future<bool> delete(String table, {required String where}) async{
+    var conn = await connect();
+
+    try{
+      //Using string interpolation to insert function parameters
+      String query = 'DELETE FROM $table WHERE $where';
+      await conn.query(query);
+      await conn.close();
+      return true;
+    }
+    catch (e){
+      await conn.close();
+      throw DatabaseOperationException('Failed to execute DELETE query');
+    } 
+  }
+
+  Future<bool> update(String table, {required List<dynamic> colVal, required String where,}) async{
+    var conn = await connect();
+
+    try{
+      //Using string interpolation to insert function parameters
+      String query = 'UPDATE $table SET ${colVal.join(', ')} WHERE $where';
+      await conn.query(query);
+      await conn.close();
+      return true;
+    }
+    catch (e){
+      await conn.close();
+      throw DatabaseOperationException('Failed to execute UPDATE query');
+    } 
   }
 }

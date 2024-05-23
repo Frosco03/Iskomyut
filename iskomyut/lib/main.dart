@@ -1,3 +1,4 @@
+import 'package:front_end/add_vehicle_form.dart';
 import 'package:front_end/manage_vehicles.dart';
 import 'package:front_end/signup.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,8 @@ class MyApp extends StatelessWidget {
           '/login': (context) => Login(),
           '/signup': (context) => Signup(),
           '/manage_vehicles': (context) => ManageVehicles(),
-          '/vehicle_form': (context) => VehicleForm(),
+          '/vehicle_form_update': (context) => VehicleUpdateForm(),
+          '/add_vehicle_form': (context) => AddVehicleForm(),
         }
       );
   }

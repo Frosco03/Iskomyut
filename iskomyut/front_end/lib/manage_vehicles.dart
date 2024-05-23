@@ -1,5 +1,6 @@
 library front_end;
 
+import 'package:db_integration/db_integration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,10 +14,37 @@ class ManageVehicles extends StatefulWidget {
 
 class _ManageVehiclesState extends State<ManageVehicles> {
   List vehicles = [];
+  var db = DBManager();
+  bool isReady = false;
+
+  void getVehicles() async{
+    vehicles = await db.getValues('vehicles', where: 'companyId = 1', join: 'vehicle_models', joinCondition: 'vehicles.model = vehicle_models.id'); //TODO make sure that the companyID is set to a variable    
+    setState((){
+      isReady = true;
+    });
+  }
+
+  void _refreshPage(){
+    isReady = false;
+    setState(() {
+      getVehicles();
+    });
+  }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    //Get the list of vehicles available to the company
+    getVehicles();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context){
     final contextTextTheme = Theme.of(context).textTheme;
+
+    if(!isReady){
+      return Container(decoration: const BoxDecoration(color: Colors.white),);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +56,8 @@ class _ManageVehiclesState extends State<ManageVehicles> {
         children: [
           ListView(
             children: [
-              VehicleCard(contextTextTheme: contextTextTheme),
+              for(var vehicle in vehicles)
+                VehicleCard(contextTextTheme: contextTextTheme, model: vehicle['modelName'], plateNo: vehicle['plate'], refreshPage: _refreshPage),
             ],
           ),
           Positioned(
@@ -46,7 +75,10 @@ class _ManageVehiclesState extends State<ManageVehicles> {
                   width: 2,
                 ),
               ),
-              onPressed: () {},
+              onPressed: () async {
+                await Navigator.pushNamed(context, '/add_vehicle_form');
+                _refreshPage();
+              },
               child: const Text('+'),
             ),
           ),
@@ -60,9 +92,14 @@ class VehicleCard extends StatelessWidget {
   const VehicleCard({
     super.key,
     required this.contextTextTheme,
+    required this.model, 
+    required this.plateNo,
+    required this.refreshPage,
   });
 
   final TextTheme contextTextTheme;
+  final String model, plateNo;
+  final VoidCallback refreshPage;
 
   @override
   Widget build(BuildContext context) {
@@ -80,9 +117,13 @@ class VehicleCard extends StatelessWidget {
       child: Card(
         color: const Color(0xFFF4F4F4),
         child: InkWell(
-          onTap: () {
+          onTap: () async {
             //Moves to the edit form
-            Navigator.pushNamed(context, '/vehicle_form');
+            await Navigator.pushNamed(context, '/vehicle_form_update', arguments: {
+              'model' : model,
+              'plateNo' : plateNo,
+            });
+            refreshPage();
           },
           child: Row(
             mainAxisSize: MainAxisSize.max,
@@ -107,8 +148,8 @@ class VehicleCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Toyota Hiace', style: contextTextTheme.titleLarge),
-                      Text('AKA4206', style: contextTextTheme.titleMedium),
+                      Text(model, style: contextTextTheme.titleLarge),
+                      Text(plateNo, style: contextTextTheme.titleMedium),
                     ]
                   ),
                 ),
