@@ -22,7 +22,7 @@ class DBManager{
     }
   }
 
-  Future<Results> select(String table, {List<String>? columns, String? where, List<String>? joins, String? joinCondition}) async {
+  Future<Results> select(String table, {List<String>? columns, String? where, List<String>? joins, String? joinCondition, bool? close = true}) async {
     /*
       Fix on issue that returns no value. 
       Fix based on: https://stackoverflow.com/questions/76017696/why-wont-my-mysql1-queries-in-dart-return-any-results
@@ -37,7 +37,13 @@ class DBManager{
       var query = 'SELECT ${columns != null ? columns.join(', ') : '*'} FROM $table ${joins != null ? joins.join(' ') : ''} ${where != null ? 'WHERE $where' : ''}';
       var result = await conn.query(query);
 
-      await conn.close();
+      /* 
+        close boolean to close the connection when the query is done
+        functions using transactions can let close = false to do other queries
+      */
+      if(close == true){
+        await conn.close();
+      }
       return result;
     }
     catch (e){
@@ -47,9 +53,9 @@ class DBManager{
     }   
   }
 
-  Future<List> getValues(String table, {List<String>? columns, String? where, List<String>? joins}) async{
+  Future<List> getValues(String table, {List<String>? columns, String? where, List<String>? joins, bool? close = true}) async{
     //Gets the values from a select call and returns it as a list of rows
-    var result = await select(table, columns: columns, where: where, joins: joins);
+    var result = await select(table, columns: columns, where: where, joins: joins, close: close);
     var valueList = [];
     var it = result.iterator;
 
@@ -60,19 +66,22 @@ class DBManager{
     return valueList;
   }
 
-  Future<bool> isPresent(String table, {List<String>? columns, String? where}) async {
+  Future<bool> isPresent(String table, {List<String>? columns, String? where,}) async {
     var result = await select(table, columns: columns, where: where);
     return (result.length == 1);
   }
 
-  Future<bool> insert(String table, {List<String>? columns, String? where, required List<dynamic> values}) async {
+  Future<bool> insert(String table, {List<String>? columns, String? where, required List<dynamic> values, bool? close = true}) async {
     var conn = await connect();
     
     try{
       //Using string interpolation to insert function parameters
       String query = 'INSERT INTO $table(${columns != null ? columns.join(', ') : ''}) VALUES (${values.join(', ')}) ${where != null ? 'WHERE $where' : ''}';
       await conn.query(query);
-      await conn.close();
+      
+      if(close == true){
+        await conn.close();
+      }
       return true;
     }
     catch (e){
@@ -81,14 +90,17 @@ class DBManager{
     }  
   }
 
-  Future<bool> delete(String table, {required String where}) async{
+  Future<bool> delete(String table, {required String where, bool? close = true}) async{
     var conn = await connect();
 
     try{
       //Using string interpolation to insert function parameters
       String query = 'DELETE FROM $table WHERE $where';
       await conn.query(query);
-      await conn.close();
+      
+      if(close == true){
+        await conn.close();
+      }
       return true;
     }
     catch (e){
@@ -97,19 +109,65 @@ class DBManager{
     } 
   }
 
-  Future<bool> update(String table, {required List<dynamic> colVal, required String where,}) async{
+  Future<bool> update(String table, {required List<dynamic> colVal, required String where, bool? close = true}) async{
     var conn = await connect();
 
     try{
       //Using string interpolation to insert function parameters
       String query = 'UPDATE $table SET ${colVal.join(', ')} WHERE $where';
       await conn.query(query);
-      await conn.close();
+      
+      if(close == true){
+        await conn.close();
+      }
       return true;
     }
     catch (e){
       await conn.close();
       throw DatabaseOperationException('Failed to execute UPDATE query');
     } 
+  }
+
+  Future<bool> insertRouteAndSchedules({required Map<String, dynamic> insertRoute, required List<String> insertSchedule}) async{
+    var conn = await connect();
+    
+    try{  
+      await conn.query('START TRANSACTION ');
+
+      bool insertRouteSQL = await insert('routes', columns: ['origin', 'destination', 'serviceprovider', 'price'], values: [insertRoute['origin'], insertRoute['destination'], insertRoute['serviceProvider'], insertRoute['price']], close: false);
+      await conn.query('SET @routeId = LAST_INSERT_ID()');
+
+      bool insertScheduleSQL = await insert('schedules', columns: ['routeId', 'date'], values: ['@routeId', insertSchedule.join(', ')], close: false);
+
+      await conn.query('COMMIT');
+
+      await conn.close();
+      return true;
+    }
+    catch(e){
+      await conn.close();
+      throw DatabaseOperationException('Failed to insert route and schedules.');
+    }
+  }
+
+  Future<bool> updateRouteAndSchedules({required Map<String, dynamic> updateRoute, required List<String> updateSchedule}) async{
+    var conn = await connect();
+    
+    try{  
+      await conn.query('START TRANSACTION ');
+
+      bool updateRouteSQL = await update('routes', colVal: ['origin = ${updateRoute['origin']}', 'destination = ${updateRoute['destination']}', 'price = ${updateRoute['price']}'], where: 'id = ${updateRoute['routeID']}', close: false);
+
+      bool updateScheduleSQL = await update('schedules', colVal: ['date = ${updateSchedule.join(', ')}'], where: 'routeId = ${updateRoute['routeID']}', close: false);
+
+      await conn.query('COMMIT');
+
+      await conn.close();
+      return true;
+    }
+    catch(e){
+      await conn.close();
+      throw DatabaseOperationException('Failed to insert route and schedules.');
+    }
   }
 }

@@ -25,7 +25,9 @@ class _ManageRoutesState extends State<ManageRoutes> {
       'origTerminal.terminalCode AS origCode',
       'origTerminal.terminalName AS oTerminalName',
       'destTerminal.terminalName AS dTerminalName', 
-      'destTerminal.terminalCode AS destCode'
+      'destTerminal.terminalCode AS destCode',
+      'routes.price',
+      'routes.id',
     ];
 
     routes = await db.getValues('routes', columns: cols, where: 'serviceProvider = 1', joins: join); //TODO make sure that the companyID is set to a variable    
@@ -72,7 +74,7 @@ class _ManageRoutesState extends State<ManageRoutes> {
           ListView(
             children: [
               for(var route in routes)
-                RouteCard(contextTextTheme: contextTextTheme, originCode: route['origCode'], destinationCode:route['destCode'], originTerminal: route['oTerminalName'], destinationTerminal: route['dTerminalName'], refreshPage: _refreshPage),
+                RouteCard(contextTextTheme: contextTextTheme, originCode: route['origCode'], destinationCode:route['destCode'], originTerminal: route['oTerminalName'], destinationTerminal: route['dTerminalName'], refreshPage: _refreshPage, price: route['price'].toString(), routeID: route['id'].toString(),),
             ],
           ),
           Positioned(
@@ -91,7 +93,7 @@ class _ManageRoutesState extends State<ManageRoutes> {
                 ),
               ),
               onPressed: () async {
-                await Navigator.pushNamed(context, '/add_vehicle_form');
+                await Navigator.pushNamed(context, '/add_route_form');
                 _refreshPage();
               },
               child: const Text('+'),
@@ -112,10 +114,12 @@ class RouteCard extends StatelessWidget {
     required this.originTerminal,
     required this.destinationTerminal,
     required this.refreshPage,
+    required this.price,
+    required this.routeID,
   });
 
   final TextTheme contextTextTheme;
-  final String originCode, destinationCode, originTerminal, destinationTerminal;
+  final String originCode, destinationCode, originTerminal, destinationTerminal, price, routeID;
   final VoidCallback refreshPage;
 
   @override
@@ -136,9 +140,11 @@ class RouteCard extends StatelessWidget {
         child: InkWell(
           onTap: () async {
             //Moves to the edit form
-            await Navigator.pushNamed(context, '/vehicle_form_update', arguments: {
+            await Navigator.pushNamed(context, '/update_route_form', arguments: {
               'originCode' : originCode,
               'destinationCode' : destinationCode,
+              'price' : price,
+              'routeID' : routeID,
             });
             refreshPage();
           },

@@ -1,4 +1,7 @@
 import 'package:front_end/add_vehicle_form.dart';
+import 'package:front_end/update_route_form.dart';
+import 'package:front_end/add_route_form.dart';
+import 'package:front_end/manage_routes.dart';
 import 'package:front_end/manage_vehicles.dart';
 import 'package:front_end/signup.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +46,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        initialRoute: '/manage_vehicles',
+        initialRoute: '/manage_routes',
         routes:{
           '/': (context) => Loading(),
           '/dash': (context) => UserDashboard(),
@@ -52,6 +55,9 @@ class MyApp extends StatelessWidget {
           '/manage_vehicles': (context) => ManageVehicles(),
           '/vehicle_form_update': (context) => VehicleUpdateForm(),
           '/add_vehicle_form': (context) => AddVehicleForm(),
+          '/manage_routes': (context) => ManageRoutes(),
+          '/add_route_form': (context) => AddRouteForm(),
+          '/update_route_form': (context) => UpdateRouteForm(),
         }
       );
   }
