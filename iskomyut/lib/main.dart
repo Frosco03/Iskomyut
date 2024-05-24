@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        initialRoute: '/manage_routes',
+        initialRoute: '/dash',
         routes:{
           '/': (context) => Loading(),
           '/dash': (context) => UserDashboard(),

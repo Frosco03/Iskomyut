@@ -19,6 +19,7 @@ dependencies:
   db_integration: 
     path: '../db_integration'
   crypto: ^3.0.3
+  geolocator: ^12.0.0
 
 dev_dependencies:
   flutter_test:
