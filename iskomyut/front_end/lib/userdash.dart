@@ -1,5 +1,6 @@
 library front_end;
 
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -12,7 +13,7 @@ class UserDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => IskomyutAppState(),
-      child: UserHomePage(),
+      child: const UserHomePage(),
     );
   }
 }
@@ -20,8 +21,50 @@ class UserDashboard extends StatelessWidget {
 class IskomyutAppState extends ChangeNotifier{
 }
 
-class UserHomePage extends StatelessWidget{
+class UserHomePage extends StatefulWidget{
   const UserHomePage({super.key});
+
+  @override
+  State<UserHomePage> createState() => _UserHomePageState();
+}
+
+class _UserHomePageState extends State<UserHomePage> {
+  late double _lat, _long;
+
+  @override
+  void initState() {
+    getCurrentLocation().then(
+      (value) {
+        setState(() {
+          _lat = value.latitude;
+          _long = value.longitude;
+        });
+      }      
+    );
+
+    super.initState();
+  }
+
+  Future<Position> getCurrentLocation() async{
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if(!serviceEnabled){
+      return Future.error('Location services disabled');
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if(permission == LocationPermission.denied){
+      permission = await Geolocator.requestPermission();
+      if(permission == LocationPermission.denied){
+        return Future.error('Location services denied');
+      }
+
+      if(permission == LocationPermission.deniedForever){
+        return Future.error('Location services permanently denied. We cannot get your exact location.');
+      }
+    }
+
+    return await Geolocator.getCurrentPosition();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +112,8 @@ class UserHomePage extends StatelessWidget{
                 height: 300,
                 width: 350,
                 child: FlutterMap(
-                  options: const MapOptions(
-                    initialCenter: LatLng(51.509364, -0.128928),
+                  options: MapOptions(
+                    initialCenter: LatLng(_lat, _long),
                     initialZoom: 9.2,
                   ),
                   children: [
@@ -82,13 +125,12 @@ class UserHomePage extends StatelessWidget{
                 )
               ),
         
-              BookButton(),
+              const BookButton(),
             ],
           ),
       ),
     );
   }
-  
 }
 
 class BookButton extends StatelessWidget {
@@ -100,7 +142,7 @@ class BookButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ElevatedButton.icon(
-        icon: Icon(
+        icon: const Icon(
           Icons.directions_car,
           color: Colors.white,
         ),  
@@ -111,7 +153,7 @@ class BookButton extends StatelessWidget {
           ),
           ),
         onPressed: () {
-          Navigator.pushNamed(context, '/login');
+          Navigator.pushNamed(context, '/terminals_list');
         },
       ),
     );
