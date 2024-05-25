@@ -1,4 +1,6 @@
 import 'package:front_end/add_vehicle_form.dart';
+import 'package:front_end/terminals_list.dart';
+import 'package:front_end/terminal_schedules.dart';
 import 'package:front_end/update_route_form.dart';
 import 'package:front_end/add_route_form.dart';
 import 'package:front_end/manage_routes.dart';
@@ -58,6 +60,8 @@ class MyApp extends StatelessWidget {
           '/manage_routes': (context) => ManageRoutes(),
           '/add_route_form': (context) => AddRouteForm(),
           '/update_route_form': (context) => UpdateRouteForm(),
+          '/terminals_list': (context) => TerminalList(),
+          '/terminal_schedules': (context) => TerminalSchedules()
         }
       );
   }

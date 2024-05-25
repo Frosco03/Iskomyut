@@ -158,7 +158,7 @@ class DBManager{
 
       bool updateRouteSQL = await update('routes', colVal: ['origin = ${updateRoute['origin']}', 'destination = ${updateRoute['destination']}', 'price = ${updateRoute['price']}'], where: 'id = ${updateRoute['routeID']}', close: false);
 
-      bool updateScheduleSQL = await update('schedules', colVal: ['date = ${updateSchedule.join(', ')}'], where: 'routeId = ${updateRoute['routeID']}', close: false);
+      bool updateScheduleSQL = await update('schedules', colVal: ['date = ${updateSchedule.join(',')}'], where: 'routeId = ${updateRoute['routeID']}', close: false);
 
       await conn.query('COMMIT');
 

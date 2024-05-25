@@ -153,7 +153,7 @@ class BookButton extends StatelessWidget {
           ),
           ),
         onPressed: () {
-          Navigator.pushNamed(context, '/login');
+          Navigator.pushNamed(context, '/terminals_list');
         },
       ),
     );
